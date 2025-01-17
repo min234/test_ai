@@ -1,0 +1,12 @@
+[
+  {
+    "file": "C:\\Users\\min\\tasking\\example-testing-project\\backend\\app.py",
+    "is_test_code": false,
+    "is_test_required": true
+  },
+  {
+    "file": "C:\\Users\\min\\tasking\\example-testing-project\\backend\\app_test.py",
+    "is_test_code": true,
+    "is_test_required": false
+  }
+]

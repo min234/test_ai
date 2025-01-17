@@ -1,0 +1,13 @@
+STDOUT:
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-7.4.0, pluggy-1.5.0
+rootdir: C:\Users\min\tasking\example-testing-project\frontend
+plugins: anyio-4.8.0, flask-1.3.0
+collected 0 items
+
+============================ no tests ran in 0.00s ============================
+
+
+STDERR:
+ERROR: found no collectors for C:\Users\min\tasking\example-testing-project\frontend\index.test.js
+

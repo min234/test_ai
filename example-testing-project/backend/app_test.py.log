@@ -1,0 +1,28 @@
+STDOUT:
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-7.4.0, pluggy-1.5.0
+rootdir: C:\Users\min\tasking\example-testing-project\backend
+plugins: anyio-4.8.0, flask-1.3.0
+collected 4 items
+
+app_test.py .F..                                                         [100%]
+
+================================== FAILURES ===================================
+______________________________ test_add_negative ______________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_add_negative(client):
+        response = client.get('/add/-1/-1')
+        json_data = response.get_json()
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+app_test.py:18: AssertionError
+=========================== short test summary info ===========================
+FAILED app_test.py::test_add_negative - assert 404 == 200
+========================= 1 failed, 3 passed in 0.14s =========================
+
+
+STDERR:

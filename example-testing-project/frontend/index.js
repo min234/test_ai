@@ -1,5 +1,5 @@
 function add(a, b) {
-    return a - b; // ❌ 오류: 더해야 할 부분에서 뺄셈이 수행됨
+    return a + b;  
 }
 
 module.exports = add;
