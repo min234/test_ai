@@ -1,13 +1,18 @@
 STDOUT:
-============================= test session starts =============================
-platform win32 -- Python 3.12.7, pytest-7.4.0, pluggy-1.5.0
-rootdir: C:\Users\min\tasking\example-testing-project\frontend
-plugins: anyio-4.8.0, flask-1.3.0
-collected 0 items
 
-============================ no tests ran in 0.00s ============================
+> example-frontend@1.0.0 test
+> jest
+
 
 
 STDERR:
-ERROR: found no collectors for C:\Users\min\tasking\example-testing-project\frontend\index.test.js
+PASS ./index.test.js
+  √ adds 1 + 2 to equal 3 (1 ms)
+  √ adds -1 + 1 to equal 0 (1 ms)
+  √ adds -1 + -1 to equal -2
 
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        0.165 s, estimated 1 s
+Ran all test suites.

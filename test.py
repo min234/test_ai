@@ -82,7 +82,7 @@ def list_all_files(directory):
             if not any(file.endswith(ext) for ext in excluded_extensions):
                 file_path = os.path.join(root, file)
                 # 테스트 실행과 관련 없는 파일 필터링
-                if not file.endswith(('.py', '.test.py', '.js', '.test.js')):
+                if not file.endswith(('.py', '.test.py', '.js', '.test.js','tsx')):
                     continue
                 all_files.append(file_path)
                 
@@ -159,8 +159,6 @@ def detect_test_code_with_decision(directory):
     return test_code_files, contains_test_code, decision_records
 
 
-
-
 def generate_test_file(source_file_path, language):
     """
     주어진 언어와 원본 파일에 따라 적합한 테스트 파일을 생성합니다.
@@ -216,11 +214,11 @@ def generate_test_file(source_file_path, language):
             f.write(response_content)
 
         print(f"✅ 테스트 파일이 성공적으로 생성되었습니다: {test_file_path}")
-        return test_file_path
+        return test_file_path,language
 
     except Exception as e:
         print(f"❌ 테스트 파일 생성 중 오류 발생: {e}")
-        return None
+        return None,None
     
 
 # ✅ 테스트 실행
@@ -313,6 +311,20 @@ def suggest_fix(error_message):
     except Exception as e:
         print(f"❌ 수정 제안 중 문제 발생: {e}")
         return None
+def detect_language_from_file_extension(file_path):
+    """
+    파일 확장자를 기반으로 언어를 감지합니다.
+    """
+    extension_language_map = {
+        '.py': 'Python',
+        '.js': 'JavaScript',
+        '.jsx': 'JavaScript',
+        '.ts': 'TypeScript',
+        '.tsx': 'TypeScript',
+        '.java': 'Java',
+    }
+    _, file_extension = os.path.splitext(file_path)
+    return extension_language_map.get(file_extension, 'Unknown')
 
 # ✅ 프로젝트 분석 및 테스트
 def analyze_and_test_file(file_path):
@@ -320,6 +332,14 @@ def analyze_and_test_file(file_path):
     단일 파일에 대해 테스트 코드 작성 및 실행 여부를 자동화된 판단에 기반하여 결정합니다.
     """
     print(f"📂 파일 '{file_path}' 분석을 시작합니다...")
+
+    # 파일 언어 감지
+    selected_language = detect_language_from_file_extension(file_path)
+    print(f"🔍 파일 {file_path}의 언어는 {selected_language}로 감지되었습니다.")
+
+    if selected_language == 'Unknown':
+        print(f"⚠️ {file_path}의 언어를 감지할 수 없습니다. 건너뜁니다.")
+        return
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -354,12 +374,13 @@ def analyze_and_test_file(file_path):
 
             if is_test_code:
                 print(f"✅ {file_path}는 테스트 코드로 확인되었습니다. 실행만 진행합니다.")
-                test_result = run_test_file(file_path, os.path.dirname(file_path), "Python")
+                test_result = run_test_file(file_path, os.path.dirname(file_path), selected_language)
             elif is_test_required:
                 print(f"🔍 테스트 파일 생성 중: {file_path}")
-                test_file = generate_test_file(file_path, "Python")
+                test_file, detected_language = generate_test_file(file_path, selected_language)
                 if test_file:
-                    test_result = run_test_file(test_file, os.path.dirname(test_file), "Python")
+                    print(f"✅ 테스트 파일 생성 완료: {test_file} (언어: {detected_language})")
+                    test_result = run_test_file(test_file, os.path.dirname(test_file), detected_language)
                 else:
                     test_result = {"stdout": "", "stderr": "테스트 파일 생성 실패"}
             else:
@@ -375,7 +396,7 @@ def analyze_and_test_file(file_path):
                 # 수정 후 다시 실행
                 retry_target = test_file if test_file else file_path
                 print(f"🔄 수정 후 테스트 재시도: {retry_target}")
-                test_result = run_test_file(retry_target, os.path.dirname(retry_target), "Python")
+                test_result = run_test_file(retry_target, os.path.dirname(retry_target), detected_language)
 
                 if "ERROR" in test_result.get("stdout", "") or test_result.get("stderr"):
                     print(f"❌ 수정 후에도 테스트 실패: {retry_target}")
@@ -387,6 +408,7 @@ def analyze_and_test_file(file_path):
     except Exception as e:
         print(f"❌ 파일 처리 중 오류 발생: {file_path} - {e}")
         analyze_and_fix_error(str(e))  # 오류 분석 및 자동 해결 시도
+
 
 
 def analyze_and_test_project(directory):
@@ -406,18 +428,26 @@ def analyze_and_test_project(directory):
         is_test_code = record["is_test_code"]
         is_test_required = record["is_test_required"]
 
+        # 파일 언어 감지
+        selected_language = detect_language_from_file_extension(file_path)
+        print(f"🔍 파일 {file_path}의 언어는 {selected_language}로 감지되었습니다.")
+
+        if selected_language == 'Unknown':
+            print(f"⚠️ {file_path}의 언어를 감지할 수 없습니다. 건너뜁니다.")
+            continue
+
         try:
             print(f"🔍 파일 처리 시작: {file_path}")
             
             if is_test_code:
                 print(f"✅ {file_path}는 테스트 코드로 확인되었습니다. 실행만 진행합니다.")
-                test_result = run_test_file(file_path, os.path.dirname(file_path), "Python")
+                test_result = run_test_file(file_path, os.path.dirname(file_path), selected_language)
             elif is_test_required:
                 print(f"🔍 테스트 파일 생성 중: {file_path}")
-                test_file = generate_test_file(file_path, "Python")
+                test_file, selected_language = generate_test_file(file_path, selected_language)
                 if test_file:
                     print(f"✅ {test_file}는 테스트 코드로 확인되었습니다. 실행만 진행합니다.")
-                    test_result = run_test_file(test_file, os.path.dirname(file_path), "Python")
+                    test_result = run_test_file(test_file, os.path.dirname(file_path), selected_language)
                 else:
                     test_result = {"stdout": "", "stderr": "테스트 파일 생성 실패"}
             else:
@@ -430,7 +460,7 @@ def analyze_and_test_project(directory):
 
                 print(f"🔄 테스트 수정 후 재시도: {test_file if test_file else file_path}")
                 retry_test_file = test_file if test_file else file_path
-                test_result = run_test_file(retry_test_file, os.path.dirname(retry_test_file), "Python")
+                test_result = run_test_file(retry_test_file, os.path.dirname(retry_test_file), selected_language)
 
             if "ERROR" in test_result.get("stdout", "") or test_result.get("stderr"):
                 error_result = suggest_fix(test_result.get("stdout", ""))
@@ -451,6 +481,7 @@ def analyze_and_test_project(directory):
                 "status": "Error",
                 "error": str(e),
             })
+
 
     print("\n🎯 **최종 요약**")
     for item in summary:
